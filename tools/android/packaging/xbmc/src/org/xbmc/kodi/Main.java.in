@@ -13,6 +13,8 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Handler;
 import org.xbmc.@APP_NAME_LC@.XBMCVideoView;
+import android.view.KeyEvent;
+import android.content.Context;
 
 public class Main extends NativeActivity
 {
@@ -23,6 +25,7 @@ public class Main extends NativeActivity
   private RelativeLayout mVideoLayout = null;
   private View thisView = null;
   private Handler handler = new Handler();
+  private AudioManager audioManager = null;
 
   native void _onNewIntent(Intent intent);
 
@@ -96,6 +99,7 @@ public class Main extends NativeActivity
     mVideoView.getHolder().setFormat(PixelFormat.TRANSPARENT);
     mVideoLayout = (RelativeLayout) findViewById(R.id.VideoLayout);
 
+    audioManager = (AudioManager)getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
     setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
     mSettingsContentObserver = new XBMCSettingsContentObserver(this, new Handler());
@@ -132,6 +136,26 @@ public class Main extends NativeActivity
               }
             }
           });
+  }
+
+  @Override
+  public boolean onKeyDown(int keyCode, KeyEvent event) {
+    switch (event.getKeyCode()) {
+      case KeyEvent.KEYCODE_VOLUME_UP:
+        audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
+                     AudioManager.ADJUST_RAISE,
+                     AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);
+        return true;
+
+      case KeyEvent.KEYCODE_VOLUME_DOWN:
+        audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
+                     AudioManager.ADJUST_LOWER,
+                     AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);
+        return true;
+
+      default:
+          return super.onKeyDown(keyCode, event);
+    }
   }
 
   @Override
